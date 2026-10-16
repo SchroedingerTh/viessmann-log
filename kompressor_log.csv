@@ -1,3 +1,4 @@
 ts_utc;aktiv;phase;starts_ges;stunden_ges;drehzahl_pct;t_ansaug_c;t_hk1_vorlauf_c;t_hk1_soll_c;t_motorraum_c;hk1_neigung;hk1_niveau
 2026-10-16T07:44:17Z;1;ready;4225;7849;90.1;13;29.1;26.9;20.8;0.3;2
 2026-10-16T08:19:10Z;0;ready;4225;7850;;22.1;27.1;26.7;26;0.3;2
+2026-10-16T12:44:41Z;0;ready;4229;7851;;32.8;24.7;25;35.4;0.3;2
