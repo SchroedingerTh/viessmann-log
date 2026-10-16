@@ -1,0 +1,38 @@
+name: Kompressor Polling
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'    # alle 5 Minuten
+  workflow_dispatch:           # manueller Start zum Testen
+
+concurrency:
+  group: poll-kompressor
+  cancel-in-progress: false   # nie abbrechen, immer warten
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Poll Viessmann API
+        env:
+          VIESSMANN_REFRESH_TOKEN: ${{ secrets.VIESSMANN_REFRESH_TOKEN }}
+          VIESSMANN_CLIENT_ID: ${{ secrets.VIESSMANN_CLIENT_ID }}
+        run: python poll_kompressor.py
+
+      - name: CSV committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add kompressor_log.csv
+          if git diff --staged --quiet; then
+            echo "Keine Änderung."
+          else
+            git commit -m "poll $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git pull --rebase
+            git push
+          fi

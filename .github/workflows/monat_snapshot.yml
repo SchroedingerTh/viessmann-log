@@ -1,0 +1,29 @@
+name: Monatsstichtag Snapshot
+
+on:
+  schedule:
+    - cron: '5 0 1 * *'   # 1. jedes Monats um 00:05 UTC
+  workflow_dispatch:        # manueller Start zum Testen
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Monatsstichtag abrufen
+        env:
+          VIESSMANN_REFRESH_TOKEN: ${{ secrets.VIESSMANN_REFRESH_TOKEN }}
+          VIESSMANN_CLIENT_ID: ${{ secrets.VIESSMANN_CLIENT_ID }}
+        run: python monat_snapshot.py
+
+      - name: Snapshot committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add monatsdaten/
+          git diff --staged --quiet || git commit -m "Monatsstichtag $(date -u +%Y-%m-%d) [skip ci]"
+          git push
