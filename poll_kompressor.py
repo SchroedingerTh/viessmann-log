@@ -27,8 +27,18 @@ LOG_FILE = Path(__file__).parent / "kompressor_log.csv"
 
 COLS = [
     "ts_utc", "aktiv", "phase", "starts_ges", "stunden_ges",
-    "drehzahl_pct", "t_ansaug_c", "t_hk1_vorlauf_c", "t_hk1_soll_c",
-    "t_motorraum_c", "hk1_neigung", "hk1_niveau",
+    "drehzahl_pct",
+    "t_aussen_c",       # echter Außenfühler
+    "t_ansaug_c",       # Ansaugtemperatur Kompressor
+    "t_hk1_vorlauf_c",  # Vorlauf Heizkreis 1 IST
+    "t_hk1_soll_c",     # Vorlauf Soll
+    "t_ruecklauf_c",    # Rücklauf Heizkreis
+    "t_ww_c",           # Warmwasser (WW-Betrieb erkennen)
+    "t_motorraum_c",
+    "t_heissgas_c",     # Heißgas-Auslass Kompressor
+    "waerme_kw",        # aktuelle Wärmeabgabe kW (für COP)
+    "strom_kw",         # aktuelle Stromaufnahme kW (für COP)
+    "hk1_neigung", "hk1_niveau",
 ]
 
 
@@ -90,10 +100,16 @@ def main():
         "starts_ges":       v(feats, "heating.compressors.0.statistics", "starts") or "",
         "stunden_ges":      v(feats, "heating.compressors.0.statistics", "hours") or "",
         "drehzahl_pct":     v(feats, "heating.compressors.0.speed.current") or "",
+        "t_aussen_c":       v(feats, "heating.sensors.temperature.outside") or "",
         "t_ansaug_c":       v(feats, "heating.compressors.0.sensors.temperature.inlet") or "",
         "t_hk1_vorlauf_c":  v(feats, "heating.circuits.1.sensors.temperature.supply") or "",
         "t_hk1_soll_c":     v(feats, "heating.circuits.1.temperature") or "",
+        "t_ruecklauf_c":    v(feats, "heating.sensors.temperature.return") or "",
+        "t_ww_c":           v(feats, "heating.dhw.sensors.temperature.hotWaterStorage") or "",
         "t_motorraum_c":    v(feats, "heating.compressors.0.sensors.temperature.motorChamber") or "",
+        "t_heissgas_c":     v(feats, "heating.compressors.0.sensors.temperature.outlet") or "",
+        "waerme_kw":        v(feats, "heating.heat.production.current") or "",
+        "strom_kw":         v(feats, "heating.power.consumption.current") or "",
         "hk1_neigung":      v(feats, "heating.circuits.1.heating.curve", "slope") or "",
         "hk1_niveau":       v(feats, "heating.circuits.1.heating.curve", "shift") or "",
     }
@@ -105,12 +121,19 @@ def main():
             w.writeheader()
         w.writerow(row)
 
+    cop = ""
+    if row["waerme_kw"] and row["strom_kw"] and float(row["strom_kw"]) > 0:
+        cop = f"  COP={float(row['waerme_kw'])/float(row['strom_kw']):.1f}"
     print(
         f"{ts}  aktiv={row['aktiv']}  phase={row['phase']}"
-        f"  t_ansaug={row['t_ansaug_c']}°C"
-        f"  t_vorlauf={row['t_hk1_vorlauf_c']}°C (soll {row['t_hk1_soll_c']}°C)"
+        f"  t_außen={row['t_aussen_c']}°C"
+        f"  VL={row['t_hk1_vorlauf_c']}°C (soll {row['t_hk1_soll_c']}°C)"
+        f"  RL={row['t_ruecklauf_c']}°C"
+        f"  WW={row['t_ww_c']}°C"
         f"  drehzahl={row['drehzahl_pct']}%"
-        f"  kurve: Neigung={row['hk1_neigung']} Niveau={row['hk1_niveau']}"
+        f"  heißgas={row['t_heissgas_c']}°C"
+        f"  W={row['waerme_kw']}kW  P={row['strom_kw']}kW{cop}"
+        f"  kurve: {row['hk1_neigung']}/{row['hk1_niveau']}"
     )
 
 
