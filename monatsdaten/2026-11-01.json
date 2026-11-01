@@ -1,0 +1,17 @@
+{
+  "datum": "2026-11-01",
+  "ts_utc": "2026-11-01T05:49:03Z",
+  "pv_vitocharge_lc_kWh": 18620.2,
+  "batt_laden_lc_kWh": 4788.9,
+  "batt_entlad_lc_kWh": 4592.6,
+  "nb_lc_kWh": 10456.4,
+  "einsp_lc_kWh": 29781.1,
+  "kompressor_starts_ges": 4425,
+  "kompressor_stunden_ges": 8019,
+  "wp_letzter_monat": {
+    "monat": "2026-09",
+    "wp_total": 157.9,
+    "wp_heizung": 87.8,
+    "wp_ww": 62.9
+  }
+}
